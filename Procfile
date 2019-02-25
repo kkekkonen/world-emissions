@@ -1,1 +1,1 @@
-web: gunicorn emission_app.emission_app.wsgi
+web: gunicorn emission_app.wsgi
