@@ -72,9 +72,9 @@ def update_database(request):
         Country_emissions.objects.all().delete()
         import_population()
         import_emissions()
-        return HttpResponse(status=200)
-    except Exception:
-        return HttpResponse(status=400)
+        return HttpResponse("import completed", status=200)
+    except Exception as e:
+        return HttpResponse(e, status=400)
 
 def emission_json(request):
     if request.method == 'GET':
