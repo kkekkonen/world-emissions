@@ -35,7 +35,6 @@ def import_population():
                         if row[header_spaced]:
                             number_dict[header] = row[header_spaced]
                     elif header in default_headers:
-                        print(len(row[header_spaced]))
                         country_dict[header] = row[header_spaced]
                     else:
                         pass
@@ -67,12 +66,19 @@ def import_emissions():
                 country_emissions.save()
 
 @user_passes_test(lambda u: u.is_superuser)
-def update_database(request):
+def update_emissions(request):
+    try:
+        Country_emissions.objects.all().delete()
+        import_emissions()
+        return HttpResponse("import completed", status=200)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+
+@user_passes_test(lambda u: u.is_superuser)
+def update_population(request):
     try:
         Country_population.objects.all().delete()
-        Country_emissions.objects.all().delete()
         import_population()
-        import_emissions()
         return HttpResponse("import completed", status=200)
     except Exception as e:
         return HttpResponse(e, status=400)
