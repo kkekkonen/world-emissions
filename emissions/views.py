@@ -35,6 +35,7 @@ def import_population():
                         if row[header_spaced]:
                             number_dict[header] = row[header_spaced]
                     elif header in default_headers:
+                        print(len(row[header_spaced]))
                         country_dict[header] = row[header_spaced]
                     else:
                         pass
