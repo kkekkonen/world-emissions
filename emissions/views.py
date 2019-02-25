@@ -3,6 +3,9 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from django.core import serializers
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import login as auth_login, authenticate as auth_authenticate, logout as auth_logout
+from django.shortcuts import redirect
+from django.urls import reverse
 from .models import Country_emissions, Country_population
 import pandas as pd
 from io import BytesIO
@@ -20,6 +23,7 @@ def is_number(s):
 default_headers = ['Country_Name', 'Country_Code', 'Indicator_Name','Indicator_Code']
 
 def import_population():
+    #this function imports the emission csv and creates a population model for each country.
     resp = urlopen('http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv')
     zipfile = ZipFile(BytesIO(resp.read()))
     for filename in zipfile.namelist():
@@ -43,6 +47,7 @@ def import_population():
                 country_population.save()
 
 def import_emissions():
+    #this function imports the emission csv and creates a emission model for each country.
     resp = urlopen('http://api.worldbank.org/v2/en/indicator/EN.ATM.CO2E.KT?downloadformat=csv')
     zipfile = ZipFile(BytesIO(resp.read()))
     for filename in zipfile.namelist():
@@ -64,24 +69,6 @@ def import_emissions():
                 country_dict['emission_values'] = json.dumps(number_dict)
                 country_emissions = Country_emissions(**country_dict)
                 country_emissions.save()
-
-@user_passes_test(lambda u: u.is_superuser)
-def update_emissions(request):
-    try:
-        Country_emissions.objects.all().delete()
-        import_emissions()
-        return HttpResponse("import completed", status=200)
-    except Exception as e:
-        return HttpResponse(e, status=400)
-
-@user_passes_test(lambda u: u.is_superuser)
-def update_population(request):
-    try:
-        Country_population.objects.all().delete()
-        import_population()
-        return HttpResponse("import completed", status=200)
-    except Exception as e:
-        return HttpResponse(e, status=400)
 
 def emission_json(request):
     if request.method == 'GET':
@@ -124,3 +111,43 @@ def country_population_json(request, country_code):
         return JsonResponse(response, safe=False)
     else:
         return HttpResponse(status=405)
+
+def login(request):
+    if request.method == 'GET':
+        return render(request, 'login.html')
+    elif request.method == 'POST':
+        username = request.POST.get('username')
+        raw_password = request.POST.get('password')
+        user = auth_authenticate(request, username=username, password=raw_password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect(reverse('admin_tools'))
+        else:
+            return render(request, 'login.html')
+
+def logout(request):
+    auth_logout(request)
+    return redirect('login', )
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_tools(request):
+    message = None
+    if request.method == "POST":
+        if 'population' in request.POST:
+            try:
+                Country_population.objects.all().delete()
+                import_population()
+                message = 'population import successful'
+            except Exception as e:
+                message = 'population import failed'
+        elif 'emissions' in request.POST:
+            try:
+                Country_emissions.objects.all().delete()
+                import_emissions()
+                message = 'emission import successful'
+            except Exception as e:
+                message = 'emission import failed'
+        context = {'message': message}
+        return render(request, 'admin_tools.html', context)
+    else:
+        return render(request, 'admin_tools.html')

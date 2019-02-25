@@ -19,6 +19,7 @@ export default class EmissionChart extends Component {
     }
 
     setPerCapita = (event) => {
+        //this function is called when the per capita tickbox is selected
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         this.processNation(this.state.nation.name, value)
@@ -29,20 +30,24 @@ export default class EmissionChart extends Component {
     }
 
     selectNation = (event) => {
+        //this function is called when the nation is changes on single nation graph
         this.processNation(event.target.value, this.state.perCapita)
     }
 
 	selectPrimaryNation = (event) => {
+        //this function is called when the user selects the first country to compare agains the second
 		const nation = this.state.countryData.find(country => country.name === event.target.value)
 		this.setState({nation})
 	}
 
 	selectNationToCompare = (event) => {
+        //this function is called when the second country is selected to compare against the first
 		const nationToCompare = this.state.countryData.find(country => country.name === event.target.value)
 		this.setState({nationToCompare})
 	}
 
     processNation = (countryName, perCapita) => {
+        //this function creates the graph used in single country graph. Some computation is needed if the per capita tickbox is selected
         const nation = this.state.countryData.find(country => country.name === countryName)
         let emission_values = {}
         if (perCapita && nation) {
@@ -63,10 +68,12 @@ export default class EmissionChart extends Component {
     }
 
     changeMode = (event) => {
+        //this function changes the mode of the visualization
         this.setState({mode: event.target.value, nation: {}, nationToCompare: {}})
     }
 
     processData = (data) => {
+        //this function processes the data previously fetched when the component loads
         let nations = [];
         let topEmissions = [];
         data.forEach(function (value, index){
@@ -88,6 +95,7 @@ export default class EmissionChart extends Component {
     }
 
     componentDidMount() {
+        //when the component mounts, the country json file is fetched and processed
         try{
             fetch('/emission_json')
                 .then(response=> response.json())

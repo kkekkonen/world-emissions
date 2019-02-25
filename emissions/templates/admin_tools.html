@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'admin_tools.css' %}">
+{% endblock static-files %}
+
+{% block content %}
+<p>{{message}}</p>
+<form class="form-update" method="POST">
+    {% csrf_token %}
+    <h2>Update emissions</h2>
+    <button class="btn btn-lg btn-primary btn-block" type="submit" name="emissions">Update emissions</button>
+    <h2>Update population</h2>
+    <button class="btn btn-lg btn-primary btn-block" type="submit" name="population">Update population</button>
+</form>
+{% endblock content %}

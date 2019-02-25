@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'auth.css' %}">
+{% endblock static-files %}
+
+{% block content %}
+<form class="form-login" method="POST">
+    {% csrf_token %}
+    <h2>Please sign in</h2>
+    <input name="username" type="text" class="form-control" placeholder="Username..." required autofocus>
+    <input name="password" type="password" class="form-control" placeholder="Password..." required>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <p style='padding-top: 2%'>Accounts can be requested from the Admin.</p>
+</form>
+{% endblock content %}
