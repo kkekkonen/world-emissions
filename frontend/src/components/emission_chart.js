@@ -110,6 +110,14 @@ export default class EmissionChart extends Component {
         }
     }
 
+    orderNations = (nation1, nation2) => {
+        if (Object.keys(nation1.data)[0] < Object.keys(nation2.data)[0]) {
+            return [nation1, nation2];
+        } else {
+            return [nation2, nation1];
+        };
+    };
+
     render() {
         return (
             <div className="App">
@@ -157,7 +165,7 @@ export default class EmissionChart extends Component {
                     <LineChart data={this.state.nation.data} prefix={this.state.perCapita ? "C02 (T)" : "C02 (KT)"}/>
                 }
 				{this.state.mode === 'compare nations' && Object.keys(this.state.nation).length !== 0 && Object.keys(this.state.nationToCompare).length !== 0 &&
-                    <LineChart data={[this.state.nation, this.state.nationToCompare]} prefix={"C02 (KT)"} />
+                    <LineChart data={this.orderNations(this.state.nation, this.state.nationToCompare)} prefix={"C02 (KT)"} />
                 }
             </div>
         );

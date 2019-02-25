@@ -6,7 +6,7 @@
 {% endblock static-files %}
 
 {% block content %}
-<p>{{message}}</p>
+<p class="text-center">{{message}}</p>
 <form class="form-update" method="POST">
     {% csrf_token %}
     <h2>Update emissions</h2>
