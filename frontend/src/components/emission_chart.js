@@ -1,8 +1,13 @@
 import React, { Component } from "react";
 import ReactChartkick, { LineChart } from 'react-chartkick'
 import Chart from 'chart.js'
+import {Input, Label} from 'reactstrap';
 
 ReactChartkick.addAdapter(Chart)
+
+const labelStyle = {
+    marginRight: '20Px',
+};
 
 export default class EmissionChart extends Component {
     constructor(props) {
@@ -56,7 +61,7 @@ export default class EmissionChart extends Component {
                     .then(response => response.json())
                     .then(data => Object.keys(data.data).map(year =>
                         {if(nation.data[year] && data.data[year]) {
-                            emission_values[year] = nation.data[year] /  data.data[year]
+                            emission_values[year] = (nation.data[year] /  data.data[year]) * 1000
                         }}
                     ))
                     .then( () => this.setState({nation: { ...nation, ...{ data: emission_values } }, perCapita}))
@@ -108,46 +113,51 @@ export default class EmissionChart extends Component {
     render() {
         return (
             <div className="App">
-                <select onChange={this.changeMode}>
+                <Input type="select" onChange={this.changeMode}>
                     <option value={''}> select mode </option>
                     <option value={'nation'}>nation</option>
 					<option value={'compare nations'}>compare nations</option>
                     <option value={'top emissions'}>top emissions</option>
-                </select>
+                </Input>
                 {this.state.mode === 'nation' &&
                     <div>
-                        <select onChange={this.selectNation}>
+                        <Input type="select" onChange={this.selectNation}>
                             <option value={""}>select nation</option>
                             {this.state.nations.map((nation, i) => <option value={nation} key={i}>{nation}</option>)}}
-                        </select>
-						<label>Show per capita</label>
-                        <input
-                          name="perCapita"
-                          type="checkbox"
-                          checked={this.state.perCapita}
-                          onChange={this.setPerCapita} />
+                        </Input>
+                        {Object.keys(this.state.nation).length !== 0 &&
+                            <div>
+                                <Label style={labelStyle} for="perCapita">per capita</Label>
+                                <Input
+                                    id="perCapita"
+                                    name="perCapita"
+                                    type="checkbox"
+                                    checked={this.state.perCapita}
+                                    onChange={this.setPerCapita} />
+                            </div>
+                        }
                     </div>
                 }
 				{this.state.mode === 'compare nations' &&
                     <div>
-                        <select onChange={this.selectPrimaryNation}>
+                        <Input type="select" onChange={this.selectPrimaryNation}>
                             <option value={""}>select nation 1</option>
                             {this.state.nations.map((nation, i) => <option value={nation} key={i}>{nation}</option>)}}
-                        </select>
-						<select onChange={this.selectNationToCompare}>
+                        </Input>
+						<Input type="select" onChange={this.selectNationToCompare}>
                             <option value={""}>select nation 2</option>
                             {this.state.nations.map((nation, i) => <option value={nation} key={i + "#compare"}>{nation}</option>)}}
-                        </select>
+                        </Input>
                     </div>
                 }
                 {this.state.mode === 'top emissions' &&
-                    <LineChart data={this.state.topEmissions} />
+                    <LineChart data={this.state.topEmissions} prefix={"C02 (KT)"} />
                 }
                 {this.state.mode === 'nation' && Object.keys(this.state.nation).length !== 0 &&
-                    <LineChart data={this.state.nation.data} />
+                    <LineChart data={this.state.nation.data} prefix={this.state.perCapita ? "C02 (T)" : "C02 (KT)"}/>
                 }
 				{this.state.mode === 'compare nations' && Object.keys(this.state.nation).length !== 0 && Object.keys(this.state.nationToCompare).length !== 0 &&
-                    <LineChart data={[this.state.nation, this.state.nationToCompare]} />
+                    <LineChart data={[this.state.nation, this.state.nationToCompare]} prefix={"C02 (KT)"} />
                 }
             </div>
         );
